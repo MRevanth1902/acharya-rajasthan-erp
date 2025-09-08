@@ -1,17 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, BookOpen, Award, Shield } from "lucide-react";
 import heroImage from "@/assets/acharya-hero.jpg";
-
 const HeroSection = () => {
-  return (
-    <section className="relative min-h-screen flex items-center bg-gradient-hero overflow-hidden">
+  return <section className="relative min-h-screen flex items-center bg-gradient-hero overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
-        <img
-          src={heroImage}
-          alt="Acharya Education Portal - Modern school building"
-          className="w-full h-full object-cover"
-        />
+        <img src={heroImage} alt="Acharya Education Portal - Modern school building" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-secondary/90 via-secondary/70 to-secondary/40" />
       </div>
 
@@ -42,7 +36,7 @@ const HeroSection = () => {
                 Access Student Portal
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button variant="outline" size="lg" className="border-secondary-foreground/20 text-secondary-foreground hover:bg-secondary-foreground/10">
+              <Button variant="outline" size="lg" className="border-secondary-foreground/20 text-secondary-foreground bg-slate-800 hover:bg-slate-700">
                 Learn More
               </Button>
             </div>
@@ -96,8 +90,6 @@ const HeroSection = () => {
       {/* Decorative Elements */}
       <div className="absolute top-20 right-20 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
       <div className="absolute bottom-20 left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
