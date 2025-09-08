@@ -46,9 +46,11 @@ const Header = () => {
 
         {/* Login Button & Mobile Menu */}
         <div className="flex items-center space-x-3">
-          <Button variant="government" size="sm">
-            Login Portal
-          </Button>
+          <Link to="/auth">
+            <Button variant="government" size="sm">
+              Login Portal
+            </Button>
+          </Link>
           
           {/* Mobile Menu Toggle */}
           <Button
