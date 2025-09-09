@@ -14,7 +14,252 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          marked_by: string | null
+          status: string
+          student_id: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          marked_by?: string | null
+          status: string
+          student_id: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          marked_by?: string | null
+          status?: string
+          student_id?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["student_id"]
+          },
+        ]
+      }
+      fees: {
+        Row: {
+          academic_year: string
+          amount: number
+          created_at: string
+          due_date: string
+          fee_type: string
+          id: string
+          paid_date: string | null
+          status: string
+          student_id: string
+        }
+        Insert: {
+          academic_year?: string
+          amount: number
+          created_at?: string
+          due_date: string
+          fee_type: string
+          id?: string
+          paid_date?: string | null
+          status?: string
+          student_id: string
+        }
+        Update: {
+          academic_year?: string
+          amount?: number
+          created_at?: string
+          due_date?: string
+          fee_type?: string
+          id?: string
+          paid_date?: string | null
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fees_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["student_id"]
+          },
+        ]
+      }
+      marks: {
+        Row: {
+          academic_year: string
+          created_at: string
+          exam_date: string
+          exam_type: string
+          id: string
+          marks_obtained: number
+          student_id: string
+          subject: string
+          total_marks: number
+        }
+        Insert: {
+          academic_year?: string
+          created_at?: string
+          exam_date: string
+          exam_type: string
+          id?: string
+          marks_obtained: number
+          student_id: string
+          subject: string
+          total_marks: number
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string
+          exam_date?: string
+          exam_type?: string
+          id?: string
+          marks_obtained?: number
+          student_id?: string
+          subject?: string
+          total_marks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marks_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["student_id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          class_section: string | null
+          created_at: string
+          department: string | null
+          full_name: string
+          id: string
+          parent_of_student_id: string | null
+          phone: string | null
+          role: string
+          student_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          class_section?: string | null
+          created_at?: string
+          department?: string | null
+          full_name: string
+          id?: string
+          parent_of_student_id?: string | null
+          phone?: string | null
+          role: string
+          student_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          class_section?: string | null
+          created_at?: string
+          department?: string | null
+          full_name?: string
+          id?: string
+          parent_of_student_id?: string | null
+          phone?: string | null
+          role?: string
+          student_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          academic_year: string
+          admission_date: string
+          class: string
+          created_at: string
+          id: string
+          roll_number: string
+          section: string
+          student_id: string
+          user_id: string
+        }
+        Insert: {
+          academic_year?: string
+          admission_date?: string
+          class: string
+          created_at?: string
+          id?: string
+          roll_number: string
+          section: string
+          student_id: string
+          user_id: string
+        }
+        Update: {
+          academic_year?: string
+          admission_date?: string
+          class?: string
+          created_at?: string
+          id?: string
+          roll_number?: string
+          section?: string
+          student_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      timetable: {
+        Row: {
+          class: string
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          period: number
+          section: string
+          start_time: string
+          subject: string
+          teacher_name: string
+        }
+        Insert: {
+          class: string
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          period: number
+          section: string
+          start_time: string
+          subject: string
+          teacher_name: string
+        }
+        Update: {
+          class?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          period?: number
+          section?: string
+          start_time?: string
+          subject?: string
+          teacher_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

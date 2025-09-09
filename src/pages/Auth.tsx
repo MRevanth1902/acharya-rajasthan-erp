@@ -42,19 +42,34 @@ const Auth = () => {
     setError("");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
+      // Get user profile to determine role
+      if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          navigate("/dashboard"); // Default fallback
+        } else {
+          // Navigate based on role
+          navigate("/dashboard");
+        }
+      }
+
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
-      
-      navigate("/");
     } catch (error: any) {
       setError(error.message || "Failed to sign in");
     } finally {
@@ -80,9 +95,9 @@ const Auth = () => {
     }
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/dashboard`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -95,6 +110,23 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // Create profile after successful signup
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            user_id: data.user.id,
+            full_name: fullName,
+            role: role,
+            phone: '',
+            address: ''
+          }]);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+        }
+      }
 
       toast({
         title: "Account created!",
