@@ -19,6 +19,21 @@ const Dashboard = () => {
 
   const checkAuth = async () => {
     try {
+      // Check for mock user first (for demo purposes)
+      const mockUser = localStorage.getItem('mockUser');
+      if (mockUser) {
+        const userData = JSON.parse(mockUser);
+        setUser({ id: userData.id, email: userData.email });
+        setProfile({ 
+          full_name: userData.full_name, 
+          role: userData.role,
+          user_id: userData.id 
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Regular Supabase auth check
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {

@@ -2,344 +2,250 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { 
+  GraduationCap, 
+  Users, 
+  BookOpen, 
+  UserCheck, 
+  Building, 
+  Shield,
+  Settings,
+  FileText
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [showStaffOptions, setShowStaffOptions] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Form states
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("");
 
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        navigate("/dashboard");
       }
     };
     checkAuth();
   }, [navigate]);
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRoleLogin = async (role: string, roleName: string) => {
     setIsLoading(true);
-    setError("");
-
+    
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Mock authentication - create a temporary session
+      const mockUser = {
+        id: `mock-${role}-${Date.now()}`,
+        email: `${role}@acharya.gov.in`,
+        full_name: `Demo ${roleName}`,
+        role: role
+      };
 
-      if (error) throw error;
-
-      // Get user profile to determine role
-      if (data.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          navigate("/dashboard"); // Default fallback
-        } else {
-          // Navigate based on role
-          navigate("/dashboard");
-        }
-      }
-
+      // Set mock session in localStorage for demo purposes
+      localStorage.setItem('mockUser', JSON.stringify(mockUser));
+      
       toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
+        title: `Welcome, ${roleName}!`,
+        description: `Accessing your ${roleName} dashboard...`,
       });
-    } catch (error: any) {
-      setError(error.message || "Failed to sign in");
+
+      // Navigate to dashboard
+      navigate("/dashboard");
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const redirectUrl = `${window.location.origin}/dashboard`;
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName,
-            role: role,
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      // Create profile after successful signup
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{
-            user_id: data.user.id,
-            full_name: fullName,
-            role: role,
-            phone: '',
-            address: ''
-          }]);
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-        }
-      }
-
-      toast({
-        title: "Account created!",
-        description: "Please check your email to confirm your account.",
-      });
-      
-      // Clear form
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-      setFullName("");
-      setRole("");
-    } catch (error: any) {
-      setError(error.message || "Failed to create account");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleStaffRole = (staffRole: string, staffName: string) => {
+    setShowStaffOptions(false);
+    handleRoleLogin(staffRole, staffName);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-primary">
-              <GraduationCap className="h-7 w-7 text-primary-foreground" />
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-6">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-card shadow-primary-glow">
+              <GraduationCap className="h-12 w-12 text-primary" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Acharya Portal</h1>
-          <p className="text-muted-foreground">Government of Rajasthan</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Acharya Education Portal</h1>
+          <p className="text-white/80 text-lg">Government of Rajasthan</p>
+          <p className="text-white/60 text-sm mt-2">शिक्षा विभाग | Education Department</p>
         </div>
 
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+        {/* Role Selection Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Student Role */}
+          <Card className="group hover:shadow-primary-glow transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 hover:border-primary">
+            <CardContent className="p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BookOpen className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Student</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Access your academic records, attendance, and course materials
+              </p>
+              <Button 
+                className="w-full" 
+                onClick={() => handleRoleLogin('student', 'Student')}
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Enter Portal"}
+              </Button>
+            </CardContent>
+          </Card>
 
-          {/* Sign In Tab */}
-          <TabsContent value="signin">
-            <Card>
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-xl">Sign In</CardTitle>
-                <CardDescription>
-                  Enter your credentials to access your account
-                </CardDescription>
+          {/* Staff Role */}
+          <Card className="group hover:shadow-primary-glow transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 hover:border-primary">
+            <CardContent className="p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Staff</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Faculty, Warden, and Management access
+              </p>
+              <Button 
+                className="w-full" 
+                onClick={() => setShowStaffOptions(true)}
+                disabled={isLoading}
+              >
+                Select Role
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Parent Role */}
+          <Card className="group hover:shadow-primary-glow transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 hover:border-primary">
+            <CardContent className="p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <UserCheck className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Parent</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Monitor your child's academic progress and fees
+              </p>
+              <Button 
+                className="w-full" 
+                onClick={() => handleRoleLogin('parent', 'Parent')}
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Enter Portal"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Admission Role */}
+          <Card className="group hover:shadow-primary-glow transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 hover:border-primary">
+            <CardContent className="p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="h-16 w-16 rounded-full bg-gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <FileText className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Admission</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Apply for admission and track application status
+              </p>
+              <Button 
+                className="w-full" 
+                onClick={() => handleRoleLogin('admission', 'Admission')}
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Apply Now"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Staff Sub-roles Modal */}
+        {showStaffOptions && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Users className="h-5 w-5" />
+                  <span>Select Staff Role</span>
+                </CardTitle>
+                <CardDescription>Choose your specific role to continue</CardDescription>
               </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full justify-start h-16" 
+                  variant="outline"
+                  onClick={() => handleStaffRole('faculty', 'Faculty')}
+                >
+                  <BookOpen className="h-6 w-6 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Faculty</p>
+                    <p className="text-sm text-muted-foreground">Teaching staff and subject experts</p>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="signin-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
+                </Button>
+                
+                <Button 
+                  className="w-full justify-start h-16" 
+                  variant="outline"
+                  onClick={() => handleStaffRole('warden', 'Warden')}
+                >
+                  <Building className="h-6 w-6 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Warden</p>
+                    <p className="text-sm text-muted-foreground">Hostel and residential management</p>
                   </div>
-
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
-                  </Button>
-                </form>
+                </Button>
+                
+                <Button 
+                  className="w-full justify-start h-16" 
+                  variant="outline"
+                  onClick={() => handleStaffRole('admin', 'Manager')}
+                >
+                  <Settings className="h-6 w-6 mr-3" />
+                  <div className="text-left">
+                    <p className="font-medium">Manager</p>
+                    <p className="text-sm text-muted-foreground">Administrative and management roles</p>
+                  </div>
+                </Button>
+                
+                <Button 
+                  className="w-full mt-4" 
+                  variant="ghost"
+                  onClick={() => setShowStaffOptions(false)}
+                >
+                  Cancel
+                </Button>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* Sign Up Tab */}
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-xl">Create Account</CardTitle>
-                <CardDescription>
-                  Register for a new account to access the portal
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-role">Role</Label>
-                    <Select value={role} onValueChange={setRole} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="student">Student</SelectItem>
-                        <SelectItem value="parent">Parent</SelectItem>
-                        <SelectItem value="faculty">Faculty</SelectItem>
-                        <SelectItem value="warden">Warden</SelectItem>
-                        <SelectItem value="admin">Admin/Manager</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Create a password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm">Confirm Password</Label>
-                    <Input
-                      id="signup-confirm"
-                      type="password"
-                      placeholder="Confirm your password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Footer */}
-        <div className="text-center mt-6 text-sm text-muted-foreground">
-          <p>© 2024 Acharya School - Government of Rajasthan</p>
+        {/* Government Branding Footer */}
+        <div className="text-center">
+          <div className="inline-flex items-center space-x-4 bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3">
+            <Shield className="h-6 w-6 text-white" />
+            <div className="text-white text-sm">
+              <p className="font-medium">राजस्थान सरकार | Government of Rajasthan</p>
+              <p className="text-white/70">Secure Portal • आधिकारिक पोर्टल</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
